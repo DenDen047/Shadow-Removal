@@ -6,17 +6,18 @@ from tqdm import tqdm
 
 
 # parameters
-image_size = 500
+image_size = 1000
 
 
 print('load the image...')
-img = cv2.imread('1.png') #path to the image
+img = cv2.imread('data/card.png') #path to the image
 img = np.float64(img)
 # Determine the scaling factor, keeping the aspect ratio
 height, width = img.shape[:2]
 scaling_factor = image_size / max(height, width)
 # Resize the image
 resized_img = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA)
+cv2.imwrite('resized_input.png', resized_img)
 # Split channels if needed
 blue, green, red = cv2.split(resized_img)
 print('Done!')
@@ -126,4 +127,4 @@ r_ti=c_ti/sum_ti
 r_ti2=255*r_ti
 
 
-cv2.imwrite('result.png',r_ti2) #path to directory where image is saved
+cv2.imwrite('invariant.png', r_ti2)
