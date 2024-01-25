@@ -2,12 +2,24 @@ import cv2
 import numpy as np
 import math
 import statistics
+from tqdm import tqdm
 
 
+# parameters
+image_size = 500
 
-img=cv2.imread('p003.png') #path to the image
-img=np.float64(img)
-blue,green,red=cv2.split(img)
+
+print('load the image...')
+img = cv2.imread('1.png') #path to the image
+img = np.float64(img)
+# Determine the scaling factor, keeping the aspect ratio
+height, width = img.shape[:2]
+scaling_factor = image_size / max(height, width)
+# Resize the image
+resized_img = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA)
+# Split channels if needed
+blue, green, red = cv2.split(resized_img)
+print('Done!')
 
 blue[blue==0]=1
 green[green==0]=1
@@ -33,7 +45,7 @@ X=np.dot(rho,U.T) #2D points on a plane orthogonal to [1,1,1]
 d1,d2,d3=img.shape
 
 e_t=np.zeros((2,181))
-for j in range(181):
+for j in tqdm(range(181)):
     e_t[0][j]=math.cos(j*math.pi/180.0)
     e_t[1][j]=math.sin(j*math.pi/180.0)
 
@@ -42,11 +54,11 @@ nel=img.shape[0]*img.shape[1]
 
 bw=np.zeros((1,181))
 
-for i in range(181):
+for i in tqdm(range(181)):
     bw[0][i]=(3.5*np.std(Y[:,:,i]))*((nel)**(-1.0/3))
 
 entropy=[]
-for i in range(181):
+for i in tqdm(range(181)):
     temp=[]
     comp1=np.mean(Y[:,:,i])-3*np.std(Y[:,:,i])
     comp2=np.mean(Y[:,:,i])+3*np.std(Y[:,:,i])
@@ -85,22 +97,23 @@ beta=theta[1,:]
 beta=np.atleast_2d(beta)
 
 
-
-
 #Finding the top 1% of mX
 mX1=mX.reshape(mX.shape[0]*mX.shape[1])
 mX1sort=np.argsort(mX1)[::-1]
 mX1sort=mX1sort+1
-mX1sort1=np.remainder(mX1sort,mX.shape[1])
+mX1sort1 = np.remainder(mX1sort,mX.shape[1])
 mX1sort1=mX1sort1-1
-mX1sort2=np.divide(mX1sort,mX.shape[1])
-mX_index=[[x,y,0] for x,y in zip(list(mX1sort2),list(mX1sort1))]
-mX_top=[mX[x[0],x[1],x[2]] for x in mX_index[:int(0.01*mX.shape[0]*mX.shape[1])]]
+mX1sort2 = (mX1sort / mX.shape[1]).astype(int)
+mX_index=[[x,y,0] for x, y in zip(list(mX1sort2), list(mX1sort1))]
+mX_top = [
+    mX[x[0], x[1], x[2]]
+    for x in mX_index[:int(0.01 * mX.shape[0] * mX.shape[1])]
+]
 mX_th_top=[mX_th[x[0],x[1],x[2]] for x in mX_index[:int(0.01*mX_th.shape[0]*mX_th.shape[1])]]
 X_E=(statistics.median(mX_top)-statistics.median(mX_th_top))*beta.T
 X_E=X_E.T
 
-for i in range(X_th.shape[0]):
+for i in tqdm(range(X_th.shape[0])):
    for j in range(X_th.shape[1]):
        X_th[i,j,:]=X_th[i,j,:]+X_E
 
@@ -113,4 +126,4 @@ r_ti=c_ti/sum_ti
 r_ti2=255*r_ti
 
 
-cv2.imwrite('p003-1.png',r_ti2) #path to directory where image is saved
+cv2.imwrite('result.png',r_ti2) #path to directory where image is saved
