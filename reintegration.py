@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy.ndimage import gaussian_gradient_magnitude
 
+
 def shadow_edge_detection(original_image, invariant_image, threshold1, threshold2):
     # Apply Mean-Shift on original image
     mean_shifted = cv2.pyrMeanShiftFiltering(original_image, 21, 51)
@@ -19,10 +20,23 @@ def shadow_edge_detection(original_image, invariant_image, threshold1, threshold
 
     return shadow_edges_thick
 
+
 def re_integration(original_image, shadow_edges):
-    # Placeholder for re-integration logic
-    # This should include gradient-based edge growing, Fourier transform, etc.
-    pass
+    # Convert to log color space
+    log_image = np.log1p(original_image)
+
+    # Grow edges in the log space
+    for _ in range(5):  # Iterative dilation (this number can be adjusted)
+        log_image = cv2.dilate(log_image, None)
+
+    # Inverse log transform
+    re_integrated_image = np.expm1(log_image)
+
+    # Clipping values to maintain proper image format
+    re_integrated_image = np.clip(re_integrated_image, 0, 255).astype(np.uint8)
+
+    return re_integrated_image
+
 
 def entropy_minimization(image):
     # Placeholder for entropy minimization logic
@@ -38,6 +52,7 @@ threshold2 = 0.2
 
 # Shadow edge detection
 shadow_edges = shadow_edge_detection(original_image, invariant_image, threshold1, threshold2)
+cv2.imwrite('shadow_edge.png', shadow_edges * 255)
 
 # Re-integrate the image
 re_integrated_image = re_integration(original_image, shadow_edges)

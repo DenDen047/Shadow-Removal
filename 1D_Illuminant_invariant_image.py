@@ -37,10 +37,12 @@ b1 = np.atleast_3d(b)
 c1 = np.atleast_3d(c)
 rho= np.concatenate((c1,b1,a1),axis=2) #log chromaticity on a plane
 
-U=[[1/math.sqrt(2),-1/math.sqrt(2),0],[1/math.sqrt(6),1/math.sqrt(6),-2/math.sqrt(6)]]
-U=np.array(U) #eigens
+U = np.array([
+    [1/math.sqrt(2), -1/math.sqrt(2), 0],
+    [1/math.sqrt(6), 1/math.sqrt(6), -2/math.sqrt(6)]
+])  #eigens
 
-X=np.dot(rho,U.T) #2D points on a plane orthogonal to [1,1,1]
+X = np.dot(rho, U.T) #2D points on a plane orthogonal to [1,1,1]
 
 
 d1,d2,d3=img.shape
