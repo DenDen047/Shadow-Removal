@@ -10,7 +10,7 @@ image_size = 1000
 
 
 print('load the image...')
-img = cv2.imread('data/card.png') #path to the image
+img = cv2.imread('data/DSC_0003.JPG') #path to the image
 img = np.float64(img)
 # Determine the scaling factor, keeping the aspect ratio
 height, width = img.shape[:2]
@@ -65,10 +65,11 @@ for i in tqdm(range(181)):
     temp=[]
     comp1=np.mean(Y[:,:,i])-3*np.std(Y[:,:,i])
     comp2=np.mean(Y[:,:,i])+3*np.std(Y[:,:,i])
-    for j in range(Y.shape[0]):
-        for k in range(Y.shape[1]):
-            if Y[j][k][i]>comp1 and Y[j][k][i]<comp2:
-                temp.append(Y[j][k][i])
+    temp = Y[:, :, i][(comp1 < Y[:, :, i]) & (Y[:, :, i] < comp2)]
+    # for j in range(Y.shape[0]):
+    #     for k in range(Y.shape[1]):
+    #         if Y[j][k][i]>comp1 and Y[j][k][i]<comp2:
+    #             temp.append(Y[j][k][i])
     nbins=round((max(temp)-min(temp))/bw[0][i])
     (hist,waste)=np.histogram(temp,bins=nbins)
     hist=filter(lambda var1: var1 != 0, hist)
@@ -126,7 +127,10 @@ sum_ti=np.sum(c_ti,axis=2)
 sum_ti=sum_ti.reshape(c_ti.shape[0],c_ti.shape[1],1)
 r_ti=c_ti/sum_ti
 
-r_ti2=255*r_ti
+invariant_img = (r_ti * 255).astype(np.uint8)
 
 
-cv2.imwrite('invariant.png', r_ti2)
+cv2.imwrite(
+    'invariant.png',
+    cv2.cvtColor(invariant_img, cv2.COLOR_RGB2BGR)
+)
