@@ -4,15 +4,18 @@ from scipy.ndimage import gaussian_gradient_magnitude
 
 
 def shadow_edge_detection(original_image, invariant_image, threshold1, threshold2):
+    invariant_image = invariant_image.astype(np.float32)
+
     # Apply Mean-Shift on original image
     mean_shifted = cv2.pyrMeanShiftFiltering(original_image, 21, 51)
+    mean_shifted = mean_shifted.astype(np.float32)
 
     # Detect edges on both images
     edges_original = gaussian_gradient_magnitude(mean_shifted, sigma=3)
     edges_invariant = gaussian_gradient_magnitude(invariant_image, sigma=3)
 
     # Thresholding to find shadow edges
-    shadow_edges = (edges_original > threshold1) & (edges_invariant < threshold2)
+    shadow_edges = (threshold1 < edges_original) & (edges_invariant < threshold2)
 
     # Morphological thickening of edges
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
@@ -42,12 +45,13 @@ def entropy_minimization(image):
     # Placeholder for entropy minimization logic
     pass
 
+
 # Load your images
 original_image = cv2.imread('resized_input.png')
 invariant_image = cv2.imread('invariant.png')
 
 # Parameters for shadow edge detection
-threshold1 = 0.5 # Adjust these thresholds based on your image characteristics
+threshold1 = 0.8 # Adjust these thresholds based on your image characteristics
 threshold2 = 0.2
 
 # Shadow edge detection
